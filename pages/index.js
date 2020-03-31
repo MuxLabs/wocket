@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 
 const CAMERA_CONSTRAINTS = {
@@ -11,11 +11,14 @@ export default () => {
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [streamKey, setStreamKey] = useState(null);
+  const [shoutOut, setShoutOut] = useState('you');
 
   const videoRef = useRef();
   const canvasRef = useRef();
   const wsRef = useRef();
   const mediaRecorderRef = useRef();
+  const requestAnimationRef = useRef();
+  const nameRef = useRef();
 
   const enableCamera = async () => {
     const cameraStream = await navigator.mediaDevices.getUserMedia(
@@ -23,14 +26,19 @@ export default () => {
     );
 
     videoRef.current.srcObject = cameraStream;
+
     await videoRef.current.play();
 
-    updateCanvas();
+    // We need to set the canvas height/width to match the video element.
+    canvasRef.current.height = videoRef.current.clientHeight;
+    canvasRef.current.width = videoRef.current.clientWidth;
+
+    requestAnimationRef.current = requestAnimationFrame(updateCanvas);
 
     setCameraEnabled(true);
   };
 
-  const updateCanvas = async () => {
+  const updateCanvas = () => {
     if (videoRef.current.ended || videoRef.current.paused) {
       return;
     }
@@ -41,15 +49,15 @@ export default () => {
       videoRef.current,
       0,
       0,
-      videoRef.current.width,
-      videoRef.current.height
+      videoRef.current.clientWidth,
+      videoRef.current.clientHeight
     );
 
     ctx.fillStyle = '#ff0000';
     ctx.font = '50px monospace';
-    ctx.fillText(name, 50, 100);
+    ctx.fillText(`Oh hi, ${nameRef.current}`, 5, 50);
 
-    requestAnimationFrame(updateCanvas);
+    requestAnimationRef.current = requestAnimationFrame(updateCanvas);
   };
 
   const stopStreaming = () => {
@@ -61,7 +69,9 @@ export default () => {
     setStreaming(true);
 
     const protocol = window.location.protocol.replace('http', 'ws');
-    wsRef.current = new WebSocket(`${protocol}://${window.location.host}/rtmp?key=${streamKey}`);
+    wsRef.current = new WebSocket(
+      `${protocol}//${window.location.host}/rtmp?key=${streamKey}`
+    );
 
     wsRef.current.addEventListener('open', function open() {
       setConnected(true);
@@ -89,6 +99,16 @@ export default () => {
 
     mediaRecorderRef.current.start(1000);
   };
+
+  useEffect(() => {
+    nameRef.current = shoutOut;
+  }, [shoutOut]);
+
+  useEffect(() => {
+    return () => {
+      cancelAnimationFrame(requestAnimationRef.current);
+    }
+  }, []);
 
   return (
     <div style={{ maxWidth: '980px', margin: '0 auto' }}>
@@ -129,16 +149,17 @@ export default () => {
         ))}
       <div className="row">
         <div className="column">
-          <video
-            ref={videoRef}
-            muted
-            id="video"
-            width="480"
-            height="360"
-          ></video>
+          <h2>Input</h2>
+          <video ref={videoRef} controls width="100%" height="auto" muted></video>
         </div>
         <div className="column">
-          <canvas ref={canvasRef} width="480" height="360"></canvas>
+          <h2>Output</h2>
+          <canvas ref={canvasRef}></canvas>
+          <input
+            placeholder="Shout someone out!"
+            type="text"
+            onChange={e => setShoutOut(e.target.value)}
+          />
         </div>
       </div>
     </div>
