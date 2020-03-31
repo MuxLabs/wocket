@@ -60,7 +60,7 @@ export default () => {
   const startStreaming = () => {
     setStreaming(true);
 
-    wsRef.current = new WebSocket(`ws://localhost:3000/rtmp?key=${streamKey}`);
+    wsRef.current = new WebSocket(`ws://${window.location.host}/rtmp?key=${streamKey}`);
 
     wsRef.current.addEventListener('open', function open() {
       setConnected(true);
