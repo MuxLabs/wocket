@@ -168,7 +168,7 @@ export default () => {
       <div className="row">
         <div className="column">
           <h2>Input</h2>
-          <video ref={videoRef} controls width="100%" height="auto" muted></video>
+          <video ref={videoRef} width="100%" height="auto" muted playsinline></video>
         </div>
         <div className="column">
           <h2>Output</h2>
