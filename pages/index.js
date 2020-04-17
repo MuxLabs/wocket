@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 
 const CAMERA_CONSTRAINTS = {
@@ -13,6 +13,7 @@ export default () => {
   const [streamKey, setStreamKey] = useState(null);
   const [shoutOut, setShoutOut] = useState('you');
 
+  const inputStreamRef = useRef();
   const videoRef = useRef();
   const canvasRef = useRef();
   const wsRef = useRef();
@@ -21,11 +22,11 @@ export default () => {
   const nameRef = useRef();
 
   const enableCamera = async () => {
-    const cameraStream = await navigator.mediaDevices.getUserMedia(
+    inputStreamRef.current = await navigator.mediaDevices.getUserMedia(
       CAMERA_CONSTRAINTS
     );
 
-    videoRef.current.srcObject = cameraStream;
+    videoRef.current.srcObject = inputStreamRef.current;
 
     await videoRef.current.play();
 
@@ -82,8 +83,25 @@ export default () => {
       stopStreaming();
     });
 
-    const mediaStream = canvasRef.current.captureStream(30); // 30 FPS
-    mediaRecorderRef.current = new MediaRecorder(mediaStream, {
+    const videoOutputStream = canvasRef.current.captureStream(30); // 30 FPS
+
+    // Let's do some extra work to get audio to join the party.
+    // https://hacks.mozilla.org/2016/04/record-almost-everything-in-the-browser-with-mediarecorder/
+    const audioStream = new MediaStream();
+    const audioTracks = inputStreamRef.current.getAudioTracks();
+    audioTracks.forEach(function(track) {
+      audioStream.addTrack(track);
+    });
+
+    const outputStream = new MediaStream();
+    [audioStream, videoOutputStream].forEach(function(s) {
+        s.getTracks().forEach(function(t) {
+            outputStream.addTrack(t);
+        });
+    });
+
+
+    mediaRecorderRef.current = new MediaRecorder(outputStream, {
       mimeType: 'video/webm',
       videoBitsPerSecond: 3000000
     });
@@ -93,8 +111,8 @@ export default () => {
     });
 
     mediaRecorderRef.current.addEventListener('stop', () => {
-      wsRef.current.close();
       stopStreaming();
+      wsRef.current.close();
     });
 
     mediaRecorderRef.current.start(1000);

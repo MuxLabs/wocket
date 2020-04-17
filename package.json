@@ -1,6 +1,9 @@
 {
   "name": "custom-server",
   "version": "1.0.0",
+  "engines": {
+    "node": "12.x"
+  },
   "scripts": {
     "dev": "nodemon server.js",
     "build": "next build",
