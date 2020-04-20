@@ -1,0 +1,22 @@
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.videoContainer {
+  position: relative;
+}
+
+.inputVideo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.outputCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}

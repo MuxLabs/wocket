@@ -1,5 +1,4 @@
 import Head from 'next/head';
-import 'milligram';
 
 function MyApp({ Component, pageProps }) {
   return (

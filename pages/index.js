@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
+import styles from './styles.module.css';
 
 const CAMERA_CONSTRAINTS = {
   audio: true,
-  video: { width: 960, height: 540 }
+  video: { width: 960, height: 540 },
 };
 
 export default () => {
@@ -62,7 +63,10 @@ export default () => {
   };
 
   const stopStreaming = () => {
-    mediaRecorderRef.current.stop();
+    if (mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+
     setStreaming(false);
   };
 
@@ -70,9 +74,9 @@ export default () => {
     setStreaming(true);
 
     const protocol = window.location.protocol.replace('http', 'ws');
-    wsRef.current = new WebSocket(
-      `${protocol}//${window.location.host}/rtmp?key=${streamKey}`
-    );
+    // const wsUrl = `${protocol}//${window.location.host}/rtmp?key=${streamKey}`;
+    const wsUrl = `wss://next-streamr.fly.dev/rtmp?key=${streamKey}`;
+    wsRef.current = new WebSocket(wsUrl);
 
     wsRef.current.addEventListener('open', function open() {
       setConnected(true);
@@ -89,24 +93,23 @@ export default () => {
     // https://hacks.mozilla.org/2016/04/record-almost-everything-in-the-browser-with-mediarecorder/
     const audioStream = new MediaStream();
     const audioTracks = inputStreamRef.current.getAudioTracks();
-    audioTracks.forEach(function(track) {
+    audioTracks.forEach(function (track) {
       audioStream.addTrack(track);
     });
 
     const outputStream = new MediaStream();
-    [audioStream, videoOutputStream].forEach(function(s) {
-        s.getTracks().forEach(function(t) {
-            outputStream.addTrack(t);
-        });
+    [audioStream, videoOutputStream].forEach(function (s) {
+      s.getTracks().forEach(function (t) {
+        outputStream.addTrack(t);
+      });
     });
-
 
     mediaRecorderRef.current = new MediaRecorder(outputStream, {
       mimeType: 'video/webm',
-      videoBitsPerSecond: 3000000
+      videoBitsPerSecond: 3000000,
     });
 
-    mediaRecorderRef.current.addEventListener('dataavailable', e => {
+    mediaRecorderRef.current.addEventListener('dataavailable', (e) => {
       wsRef.current.send(e.data);
     });
 
@@ -125,11 +128,11 @@ export default () => {
   useEffect(() => {
     return () => {
       cancelAnimationFrame(requestAnimationRef.current);
-    }
+    };
   }, []);
 
   return (
-    <div style={{ maxWidth: '980px', margin: '0 auto' }}>
+    <div className={styles.container}>
       <Head>
         <title>Streamr</title>
       </Head>
@@ -145,16 +148,14 @@ export default () => {
         (streaming ? (
           <div>
             <span>{connected ? 'Connected' : 'Disconnected'}</span>
-            <button className="button button-outline" onClick={stopStreaming}>
-              Stop Streaming
-            </button>
+            <button onClick={stopStreaming}>Stop Streaming</button>
           </div>
         ) : (
           <>
             <input
               placeholder="Stream Key"
               type="text"
-              onChange={e => setStreamKey(e.target.value)}
+              onChange={(e) => setStreamKey(e.target.value)}
             />
             <button
               className="button button-outline"
@@ -165,21 +166,25 @@ export default () => {
             </button>
           </>
         ))}
-      <div className="row">
-        <div className="column">
-          <h2>Input</h2>
-          <video ref={videoRef} width="100%" height="auto" muted playsinline></video>
+      <div className={styles.videoContainer}>
+        <div className={styles.inputVideo}>
+          <video
+            ref={videoRef}
+            width="100%"
+            height="auto"
+            muted
+            playsInline
+          ></video>
         </div>
-        <div className="column">
-          <h2>Output</h2>
+        <div className={styles.outputCanvas}>
           <canvas ref={canvasRef}></canvas>
-          <input
-            placeholder="Shout someone out!"
-            type="text"
-            onChange={e => setShoutOut(e.target.value)}
-          />
         </div>
       </div>
+      <input
+        placeholder="Shout someone out!"
+        type="text"
+        onChange={(e) => setShoutOut(e.target.value)}
+      />
     </div>
   );
 };
