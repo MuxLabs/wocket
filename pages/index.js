@@ -140,7 +140,7 @@ export default () => {
         <h1>Streamr</h1>
         <p>
           A demo using modern web technologies to broadcast video from a browser
-          to a server via WebSockets. To learn more, see the [Github repo](https://github.com/MuxLabs/ws-ingest) or check out the [Mux blog post](https://mux.com/blog/the-state-of-going-live-from-a-browser/) on the topic.
+          to a server via WebSockets. To learn more, see the <a href="https://github.com/MuxLabs/ws-ingest">Github repo</a> or check out the <a href="https://mux.com/blog/the-state-of-going-live-from-a-browser/">Mux blog post</a> on the topic.
         </p>
 
         <p>
