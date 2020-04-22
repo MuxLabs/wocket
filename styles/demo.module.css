@@ -24,6 +24,16 @@
   margin-bottom: 1em;
 }
 
+.info a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.info a:visited {
+  color: #efefef;
+  text-decoration: underline;
+}
+
 .info input {
   margin-top: 1.5em;
   margin-bottom: 1.5em;
