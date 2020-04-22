@@ -1,5 +1,7 @@
 import Head from 'next/head';
-import 'milligram';
+
+import '../styles/reset.css';
+import '../styles/global.css';
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -10,14 +12,7 @@ function MyApp({ Component, pageProps }) {
           content="initial-scale=1.0, width=device-width"
           key="viewport"
         />
-        <link
-          rel="stylesheet"
-          href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic"
-        />
-        <link
-          rel="stylesheet"
-          href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css"
-        />
+        <link rel="stylesheet" href="//static.mux.com/fonts/fonts.css" />
       </Head>
       <Component {...pageProps} />
     </>

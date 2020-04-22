@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
+import styles from '../styles/demo.module.css';
 
 const CAMERA_CONSTRAINTS = {
   audio: true,
-  video: { width: 960, height: 540 }
+  video: true,
 };
 
 export default () => {
@@ -11,7 +12,7 @@ export default () => {
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [streamKey, setStreamKey] = useState(null);
-  const [shoutOut, setShoutOut] = useState('you');
+  const [textOverlay, setTextOverlay] = useState('Live from the browser!');
 
   const inputStreamRef = useRef();
   const videoRef = useRef();
@@ -54,15 +55,18 @@ export default () => {
       videoRef.current.clientHeight
     );
 
-    ctx.fillStyle = '#ff0000';
-    ctx.font = '50px monospace';
-    ctx.fillText(`Oh hi, ${nameRef.current}`, 5, 50);
+    ctx.fillStyle = '#FB3C4E';
+    ctx.font = '50px Akkurat';
+    ctx.fillText(nameRef.current, 10, 50, canvasRef.current.width - 20);
 
     requestAnimationRef.current = requestAnimationFrame(updateCanvas);
   };
 
   const stopStreaming = () => {
-    mediaRecorderRef.current.stop();
+    if (mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+
     setStreaming(false);
   };
 
@@ -70,9 +74,8 @@ export default () => {
     setStreaming(true);
 
     const protocol = window.location.protocol.replace('http', 'ws');
-    wsRef.current = new WebSocket(
-      `${protocol}//${window.location.host}/rtmp?key=${streamKey}`
-    );
+    const wsUrl = `${protocol}//${window.location.host}/rtmp?key=${streamKey}`;
+    wsRef.current = new WebSocket(wsUrl);
 
     wsRef.current.addEventListener('open', function open() {
       setConnected(true);
@@ -89,24 +92,23 @@ export default () => {
     // https://hacks.mozilla.org/2016/04/record-almost-everything-in-the-browser-with-mediarecorder/
     const audioStream = new MediaStream();
     const audioTracks = inputStreamRef.current.getAudioTracks();
-    audioTracks.forEach(function(track) {
+    audioTracks.forEach(function (track) {
       audioStream.addTrack(track);
     });
 
     const outputStream = new MediaStream();
-    [audioStream, videoOutputStream].forEach(function(s) {
-        s.getTracks().forEach(function(t) {
-            outputStream.addTrack(t);
-        });
+    [audioStream, videoOutputStream].forEach(function (s) {
+      s.getTracks().forEach(function (t) {
+        outputStream.addTrack(t);
+      });
     });
-
 
     mediaRecorderRef.current = new MediaRecorder(outputStream, {
       mimeType: 'video/webm',
-      videoBitsPerSecond: 3000000
+      videoBitsPerSecond: 3000000,
     });
 
-    mediaRecorderRef.current.addEventListener('dataavailable', e => {
+    mediaRecorderRef.current.addEventListener('dataavailable', (e) => {
       wsRef.current.send(e.data);
     });
 
@@ -119,65 +121,82 @@ export default () => {
   };
 
   useEffect(() => {
-    nameRef.current = shoutOut;
-  }, [shoutOut]);
+    nameRef.current = textOverlay;
+  }, [textOverlay]);
 
   useEffect(() => {
     return () => {
       cancelAnimationFrame(requestAnimationRef.current);
-    }
+    };
   }, []);
 
   return (
-    <div style={{ maxWidth: '980px', margin: '0 auto' }}>
+    <div className={styles.container}>
       <Head>
         <title>Streamr</title>
       </Head>
-      <h1>Streamr</h1>
 
-      {!cameraEnabled && (
-        <button className="button button-outline" onClick={enableCamera}>
-          Enable Camera
-        </button>
-      )}
+      <div className={styles.info}>
+        <h1>Streamr</h1>
+        <p>
+          A demo using modern web technologies to broadcast video from a browser
+          to a server via WebSockets. To learn more, see the [Github repo](https://github.com/MuxLabs/ws-ingest) or check out the [Mux blog post](https://mux.com/blog/the-state-of-going-live-from-a-browser/) on the topic.
+        </p>
 
-      {cameraEnabled &&
-        (streaming ? (
-          <div>
-            <span>{connected ? 'Connected' : 'Disconnected'}</span>
-            <button className="button button-outline" onClick={stopStreaming}>
-              Stop Streaming
-            </button>
-          </div>
-        ) : (
-          <>
-            <input
-              placeholder="Stream Key"
-              type="text"
-              onChange={e => setStreamKey(e.target.value)}
-            />
-            <button
-              className="button button-outline"
-              disabled={!streamKey}
-              onClick={startStreaming}
-            >
-              Start Streaming
-            </button>
-          </>
-        ))}
-      <div className="row">
-        <div className="column">
-          <h2>Input</h2>
-          <video ref={videoRef} width="100%" height="auto" muted playsinline></video>
+        <p>
+          This service is provided "as is," with no uptime guarantees, support, or any of the usual stuff people pay for.
+        </p>
+
+        {cameraEnabled &&
+          (streaming ? (
+            <div>
+              <span
+                className={`${styles.streamStatus} ${
+                  connected ? styles.connected : styles.disconnected
+                }`}
+              >
+                {connected ? 'Connected' : 'Disconnected'}
+              </span>
+              <input
+                placeholder="Text Overlay"
+                type="text"
+                value={textOverlay}
+                onChange={(e) => setTextOverlay(e.target.value)}
+              />
+              <button onClick={stopStreaming}>Stop Streaming</button>
+            </div>
+          ) : (
+            <>
+              <input
+                placeholder="Mux Stream Key"
+                type="text"
+                onChange={(e) => setStreamKey(e.target.value)}
+              />
+              <button
+                className={styles.startButton}
+                disabled={!streamKey}
+                onClick={startStreaming}
+              >
+                Start Streaming
+              </button>
+            </>
+          ))}
+      </div>
+      <div
+        className={`${styles.videoContainer} ${
+          cameraEnabled && styles.cameraEnabled
+        }`}
+      >
+        {!cameraEnabled && (
+          <button className={styles.startButton} onClick={enableCamera}>
+            Enable Camera
+          </button>
+        )}
+        <div className={styles.inputVideo}>
+          <video ref={videoRef} muted playsInline></video>
         </div>
-        <div className="column">
-          <h2>Output</h2>
+        <div className={styles.outputCanvas}>
           <canvas ref={canvasRef}></canvas>
-          <input
-            placeholder="Shout someone out!"
-            type="text"
-            onChange={e => setShoutOut(e.target.value)}
-          />
         </div>
       </div>
     </div>

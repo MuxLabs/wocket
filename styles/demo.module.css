@@ -1,0 +1,96 @@
+.container {
+  margin: 0 auto;
+  display: flex;
+  height: 100%;
+
+  font-family: Akkurat, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.info {
+  flex: 1 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 300px;
+  color: #fff;
+  background-color: #383838;
+  padding: 1em;
+
+  border-right: 1px solid #292929;
+}
+
+.info p {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.info input {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+  width: 100%;
+}
+
+.videoContainer {
+  position: relative;
+  width: 100%;
+  flex: 1 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.videoContainer .startButton {
+  font-size: 2em;
+  margin: 0 auto;
+  max-width: 50%;
+  z-index: 5;
+}
+
+.inputVideo {
+  z-index: 0;
+  position: absolute;
+}
+
+.inputVideo video {
+  width: 100%;
+  height: auto;
+  visibility: hidden;
+}
+
+.outputCanvas {
+  z-index: 1;
+}
+
+.outputCanvas canvas {
+  height: 100%;
+  width: 100%;
+  display: none;
+}
+
+.cameraEnabled canvas {
+  display: block;
+}
+
+.streamStatus {
+  padding-left: 1.5em;
+  position: relative;
+}
+
+.streamStatus::before {
+  position: absolute;
+  left: 0em;
+  content: '';
+  display: block;
+  height: 1em;
+  width: 1em;
+  border-radius: 1em;
+  background-color: #efefef;
+}
+
+.streamStatus.connected::before {
+  background-color: #8fe1d3;
+}
+
+.streamStatus.disconnected::before {
+  background-color: #fb3c4e;
+}
