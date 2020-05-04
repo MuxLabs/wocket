@@ -1,12 +1,24 @@
-![Websocket to RTMP](https://banner.mux.dev/?text=WS->RTMP)
+![Wocket](https://banner.mux.dev/?text=Wocket)
 
-# WebSocket to RTMP
+# Wocket (WebSocket to RTMP)
 
 A proof-of-concept for live streaming video from your browser to an RTMP endpoint using [Next.js](https://nextjs.org) and a custom server with WebSockets. This is one of the ways we discussed how you _could_ theoretically let users broadcast live to a [Mux](https://mux.com) stream key from their browser using technology (WebSockets) that are a little more common. WebRTC is great, but the server-side story is still maturing.
 
+## Clone the repo
+
+```
+git clone https://github.com/MuxLabs/wocket
+cd wocket
+```
+
 ## Setup
 
-For development you'll probably want to use `dev`, which will do little things like automatically
+### Prerequisites to run locally
+
+  * To run the server locally you will need to install [ffmpeg](https://www.ffmpeg.org/) and have the command `ffmpeg` in your $PATH. To see if it is installed correctly open up a terminal and type `ffmpeg`, if you see something that is not "command not found" then you're good!
+
+For development you'll probably want to use `dev`, which will do little things like hot reloading automatically
+
 ```javascript
 $ npm install
 $ npm run dev
@@ -18,7 +30,7 @@ The last line you should see is something along the lines of:
 $ > ready on port 3000
 ```
 
-Visit that page in the browser and you should see Streamr!
+Visit that page in the browser and you should see Wocket!
 
 ## Running the application in production
 
@@ -29,17 +41,15 @@ $ npm run build
 $ npm start
 ```
 
-## Using the Mux Labs deployment
+## Deploying to fly.io
 
-This is deployed as a Mux Labs project. That means you can feel free to experiment with our deployment and use it, but be aware that this should be considered experimental. The public deployment has *no uptime guarantees* and they're not officially supported.
+We will deploy the server with `flyctl`. Fly.io will use the Dockerfile to host the server.
 
-Connecting from your client:
+1. Create a new fly.io app `flyctl apps create`
+1. When asked about an app name, hit enter to get a generated name
+1. When asked to overwrite the `fly.toml` file, say "yes"
+1. Run `flyctl deploy` - this will deploy your app to fly.io
 
-```javascript
-const ws = new WebSocket(`wss://ws.mux.dev/rtmp?key=${MUX_STREAM_KEY}`);
-```
-
-We will spawn an ffmpeg process after a successful connection. At that point you can start sending video over the open WS connection.
 
 ### Putting it all together
 

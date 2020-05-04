@@ -133,14 +133,14 @@ export default () => {
   return (
     <div className={styles.container}>
       <Head>
-        <title>Streamr</title>
+        <title>Wocket</title>
       </Head>
 
       <div className={styles.info}>
-        <h1>Streamr</h1>
+        <h1>Wocket</h1>
         <p>
           A demo using modern web technologies to broadcast video from a browser
-          to a server via WebSockets. To learn more, see the <a href="https://github.com/MuxLabs/ws-ingest">Github repo</a> or check out the <a href="https://mux.com/blog/the-state-of-going-live-from-a-browser/">Mux blog post</a> on the topic.
+          to a server via WebSockets. To learn more, see the <a href="https://github.com/MuxLabs/wocket">Github repo</a> or check out the <a href="https://mux.com/blog/the-state-of-going-live-from-a-browser/">Mux blog post</a> on the topic.
         </p>
 
         <p>
