@@ -4,6 +4,10 @@
 
 A proof-of-concept for live streaming video from your browser to an RTMP endpoint using [Next.js](https://nextjs.org) and a custom server with WebSockets. This is one of the ways we discussed how you _could_ theoretically let users broadcast live to a [Mux](https://mux.com) stream key from their browser using technology (WebSockets) that are a little more common. WebRTC is great, but the server-side story is still maturing.
 
+This is what it looks like. This will access the browser's webcam and render it onto a canvas element. When you enter a stream key and click "Start Streaming" it will stream your webcam to a [Mux live stream](https://docs.mux.com/docs/live-streaming).
+
+![Wocket Screenshot](./screenshots/wocket-live-browser-1.png?raw=true)
+
 ## Clone the repo
 
 ```
@@ -17,7 +21,7 @@ cd wocket
 
   * To run the server locally you will need to install [ffmpeg](https://www.ffmpeg.org/) and have the command `ffmpeg` in your $PATH. To see if it is installed correctly open up a terminal and type `ffmpeg`, if you see something that is not "command not found" then you're good!
 
-For development you'll probably want to use `dev`, which will do little things like hot reloading automatically
+For development you'll probably want to use `dev`, which will do little things like hot reloading automatically.
 
 ```javascript
 $ npm install
@@ -31,6 +35,14 @@ $ > ready on port 3000
 ```
 
 Visit that page in the browser and you should see Wocket!
+
+### Getting a Mux stream key
+
+To get a stream key and actually start streaming to an RTMP ingest URL you will need a [free Mux account](https://dashboard.mux.com/signup?type=video). After you sign up create a live stream either [with the API](https://docs.mux.com/docs/live-streaming) or by navigating to 'Live Streams' in the dashboard and clicking 'Create New Live Stream' see below:
+
+![Mux Dashboard Live Stream](./screenshots/mux-live-stream-dashboard.gif?raw=true).
+
+Without entering a credit card your live streams are in 'test' mode which means they are limited to 5 minutes, watermarked with the Mux logo and deleted after 24 hours. If you enter a credit card you get $20 of free credit which unlocks the full feature set and removes all limits. The $20 of credit should be plenty to cover the costs of experimenting with the API and if you need some more for experimentation please drop us a line and let us know!
 
 ## Running the application in production
 
