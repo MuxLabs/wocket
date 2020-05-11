@@ -2,9 +2,12 @@
 
 # Wocket (WebSocket to RTMP)
 
-A proof-of-concept for live streaming video from your browser to an RTMP endpoint using [Next.js](https://nextjs.org) and a custom server with WebSockets. This is one of the ways we discussed how you _could_ theoretically let users broadcast live to a [Mux](https://mux.com) stream key from their browser using technology (WebSockets) that are a little more common. WebRTC is great, but the server-side story is still maturing.
+This project is a proof-of-concept to demonstrate how you can stream live from your browser to an RTMP server. Streaming via RTMP is how you stream to Twitch, Youtube Live, Facebook Live, and other live streaming platforms. Typically, this requires running a local encoder software (for example: [OBS](https://obsproject.com/) or [Ecamm Live](https://www.ecamm.com/mac/ecammlive/). Those are great products and if you are streaming seriously you probably still want to use them. But we threw this project together to show how you might be able to pull off the same thing from a browser. In this example, instead of streaming to something like Twitch, Youtube Live, etc, we will be using the live streaming API provided by Mux, which gives you an on-demand RTMP server that you can stream to.
 
-This is what it looks like. This will access the browser's webcam and render it onto a canvas element. When you enter a stream key and click "Start Streaming" it will stream your webcam to a [Mux live stream](https://docs.mux.com/docs/live-streaming).
+
+This project uses [Next.js](https://nextjs.org) and a custom server with WebSockets. It should be noted that this project is a fun proof-of-concept. If you want to learn more about the challenges of going live from the browser take a look at this blog post [The state of going live from a browser](https://mux.com/blog/the-state-of-going-live-from-a-browser/).
+
+This is what this project looks like. This will access the browser's webcam and render it onto a canvas element. When you enter a stream key and click "Start Streaming" it will stream your webcam to a [Mux live stream](https://docs.mux.com/docs/live-streaming).
 
 ![Wocket Screenshot](./screenshots/wocket-live-browser-1.png?raw=true)
 
