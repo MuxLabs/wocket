@@ -2,7 +2,7 @@
   "name": "custom-server",
   "version": "1.0.0",
   "engines": {
-    "node": "12.x"
+    "node": "16.x"
   },
   "scripts": {
     "dev": "nodemon server.js",

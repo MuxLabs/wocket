@@ -10,7 +10,7 @@ This project uses [Next.js](https://nextjs.org) and a custom server with WebSock
 This is what this project looks like. This will access the browser's webcam and render it onto a canvas element. When you enter a stream key and click "Start Streaming" it will stream your webcam to a [Mux live stream](https://docs.mux.com/docs/live-streaming).
 
 ![Wocket Screenshot](./screenshots/wocket-live-browser-1.png?raw=true)
-
+![Wocket Mobile Screenshot](./screenshots/wocket-live-browser-2.png?raw=true)
 ## Clone the repo
 
 ```
@@ -52,6 +52,15 @@ Without entering a credit card your live streams are in 'test' mode which means 
 Again, this should just be considered a proof of concept. I didn't write this to go to production. I beg you, don't rely on this as is for something important.
 
 ```
+$ npm run build
+$ npm start
+```
+
+When hosting the application to an external server, it needs to use HTTPS (A non secure web site wont have access to the camera).  You can use a self signed certificate for testing but on the client side you will have to trust that certificate. You can run it as
+```
+$ export CERT_FILE=<path to your cert file>
+$ export KEY_FILE=<path to your certificate key file>
+$ export HOST=0.0.0.0  // or the IP address you want to bind to.
 $ npm run build
 $ npm start
 ```

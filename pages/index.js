@@ -7,11 +7,32 @@ const CAMERA_CONSTRAINTS = {
   video: true,
 };
 
+const getRecoderSettings = () => {
+  const settings = {};
+  if (MediaRecorder.isTypeSupported('video/mp4')) {
+    settings.format = 'mp4';
+    settings.video = 'h264';
+    settings.audio = 'aac';
+  } else {
+    settings.format = 'webm';
+    settings.audio = 'opus';
+    settings.video = MediaRecorder.isTypeSupported('video/webm;codecs=h264') ? 'h264' : 'vp8';
+  }
+  return settings;
+}
+
+const getRecorderMimeType = () => {
+  const settings = getRecoderSettings();
+  const codecs = settings.format === 'webm' ? `;codecs="${settings.video}, ${settings.audio}"` : '';
+  return `video/${settings.format}${codecs}`;
+}
+
 export default () => {
   const [connected, setConnected] = useState(false);
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [streamKey, setStreamKey] = useState(null);
+  const [streamUrl, setStreamUrl] = useState(null);
   const [textOverlay, setTextOverlay] = useState('Live from the browser!');
 
   const inputStreamRef = useRef();
@@ -37,8 +58,8 @@ export default () => {
 
     requestAnimationRef.current = requestAnimationFrame(updateCanvas);
 
-    setCameraEnabled(true);
-  };
+    setCameraEnabled(true);  
+};
 
   const updateCanvas = () => {
     if (videoRef.current.ended || videoRef.current.paused) {
@@ -57,7 +78,9 @@ export default () => {
 
     ctx.fillStyle = '#FB3C4E';
     ctx.font = '50px Akkurat';
-    ctx.fillText(nameRef.current, 10, 50, canvasRef.current.width - 20);
+    const date = new Date();
+    const dateText = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds().toString().padStart(3, '0')}`;
+    ctx.fillText(`${nameRef.current}${dateText}`, 10, 50, canvasRef.current.width - 20);
 
     requestAnimationRef.current = requestAnimationFrame(updateCanvas);
   };
@@ -72,9 +95,9 @@ export default () => {
 
   const startStreaming = () => {
     setStreaming(true);
-
+    const settings = getRecoderSettings();
     const protocol = window.location.protocol.replace('http', 'ws');
-    const wsUrl = `${protocol}//${window.location.host}/rtmp?key=${streamKey}`;
+    const wsUrl = `${protocol}//${window.location.host}/rtmp?url=${streamUrl}&key=${streamKey}&video=${settings.video}&audio=${settings.audio}`;
     wsRef.current = new WebSocket(wsUrl);
 
     wsRef.current.addEventListener('open', function open() {
@@ -104,8 +127,9 @@ export default () => {
     });
 
     mediaRecorderRef.current = new MediaRecorder(outputStream, {
-      mimeType: 'video/webm',
+      mimeType: getRecorderMimeType(),
       videoBitsPerSecond: 3000000,
+      audioBitsPerSecond: 64000,
     });
 
     mediaRecorderRef.current.addEventListener('dataavailable', (e) => {
@@ -118,7 +142,7 @@ export default () => {
     });
 
     mediaRecorderRef.current.start(1000);
-  };
+};
 
   useEffect(() => {
     nameRef.current = textOverlay;
@@ -168,9 +192,14 @@ export default () => {
           ) : (
             <>
               <input
-                placeholder="Mux Stream Key"
+                placeholder="rtmps://global-live.mux.com/app"
                 type="text"
-                onChange={(e) => setStreamKey(e.target.value)}
+                onChange={(e) => setStreamUrl(e.target.value)}
+              />
+              <input 
+                placeholder="Stream key"
+                type="text"
+                onChange={(e) => setStreamKey(e.target.value)} 
               />
               <button
                 className={styles.startButton}
