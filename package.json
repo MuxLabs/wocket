@@ -17,8 +17,8 @@
   "dependencies": {
     "milligram": "^1.3.0",
     "next": "latest",
-    "react": "^16.7.0",
-    "react-dom": "^16.7.0",
+    "react": "latest",
+    "react-dom": "latest",
     "ws": "^7.2.3"
   },
   "devDependencies": {
