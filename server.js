@@ -14,7 +14,7 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 const cert = process.env.CERT_FILE ? fs.readFileSync(process.env.CERT_FILE) : undefined;
 const key = process.env.KEY_FILE ? fs.readFileSync(process.env.KEY_FILE) : undefined;
-
+const transcode = process.env.SMART_TRANSCODE || true;
 const options = {
   cert,
   key
@@ -48,12 +48,12 @@ app.prepare().then(() => {
 
     const rtmpUrl = `${baseUrl}/${key}`;
 
-    const videoCodec = video === 'h264' ? 
+    const videoCodec = video === 'h264' && !transcode ? 
       [ '-c:v', 'copy'] :
       // video codec config: low latency, adaptive bitrate
       ['-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'zerolatency', '-vf', 'scale=w=-2:0'];
 
-    const audioCodec = audio === 'aac' ? 
+    const audioCodec = audio === 'aac' && !transcode ? 
       [ '-c:a', 'copy'] :
       // audio codec config: sampling frequency (11025, 22050, 44100), bitrate 64 kbits
       ['-c:a', 'aac', '-ar', '44100', '-b:a', '64k'];

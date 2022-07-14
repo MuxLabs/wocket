@@ -27,8 +27,8 @@ cd wocket
 For development you'll probably want to use `dev`, which will do little things like hot reloading automatically.
 
 ```javascript
-$ npm install
-$ npm run dev
+$ yarn install
+$ yarn dev
 ```
 
 The last line you should see is something along the lines of:
@@ -52,14 +52,15 @@ Without entering a credit card your live streams are in 'test' mode which means 
 Again, this should just be considered a proof of concept. I didn't write this to go to production. I beg you, don't rely on this as is for something important.
 
 ```
-$ npm run build
-$ npm start
+$ yarn build
+$ yarn start
 ```
 
 When hosting the application to an external server, it needs to use HTTPS (A non secure web site wont have access to the camera).  You can use a self signed certificate for testing but on the client side you will have to trust that certificate. You can run it as
 ```
 $ export CERT_FILE=<path to your cert file>
 $ export KEY_FILE=<path to your certificate key file>
+$ export SMART_TRANSCODE=true // if not set will always transcode the stream.
 $ export HOST=0.0.0.0  // or the IP address you want to bind to.
 $ npm run build
 $ npm start
@@ -69,11 +70,15 @@ $ npm start
 
 We will deploy the server with `flyctl`. Fly.io will use the Dockerfile to host the server.
 
-1. Create a new fly.io app `flyctl apps create`
+1. Create a new fly.io app `flyctl launch`
+1. When asked copying the configuration file, say "yes"
 1. When asked about an app name, hit enter to get a generated name
-1. When asked to overwrite the `fly.toml` file, say "yes"
-1. Run `flyctl deploy` - this will deploy your app to fly.io
+1. When asked about which region select one or use the recommended region
+1. When asked if you want a Postgresql database, say "no"
+1. When asked if you want to deploy now, say "yes"
+1. If it doesn't deploy properly the first time on creation and stays in the 'pending' state in the fly dashboard, try giving it a kick again by running `flyctl deploy`
 
+Read the blog post [on the fly.io blog](https://fly.io/blog/mux-fly-wocket-and-rtmp/) -- the fly.io blog is GREAT by the way, and it's full of great stuff. If it's your first time finding the fly blog, sorry for ruining the productivity of your day.
 
 ### Putting it all together
 

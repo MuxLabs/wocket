@@ -3,7 +3,7 @@ ENV NODE_OPTIONS=--openssl-legacy-provider
 WORKDIR /app
 
 COPY package.json .
-COPY package-lock.json .
+COPY yarn.lock .
 
 RUN apk add  --no-cache ffmpeg && npm install --production
 

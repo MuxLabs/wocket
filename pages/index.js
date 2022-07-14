@@ -7,7 +7,7 @@ const CAMERA_CONSTRAINTS = {
   video: true,
 };
 
-const getRecoderSettings = () => {
+const getRecorderSettings = () => {
   const settings = {};
   if (MediaRecorder.isTypeSupported('video/mp4')) {
     settings.format = 'mp4';
@@ -22,7 +22,7 @@ const getRecoderSettings = () => {
 }
 
 const getRecorderMimeType = () => {
-  const settings = getRecoderSettings();
+  const settings = getRecorderSettings();
   const codecs = settings.format === 'webm' ? `;codecs="${settings.video}, ${settings.audio}"` : '';
   return `video/${settings.format}${codecs}`;
 }
@@ -95,9 +95,17 @@ export default () => {
 
   const startStreaming = () => {
     setStreaming(true);
-    const settings = getRecoderSettings();
+    const settings = getRecorderSettings();
     const protocol = window.location.protocol.replace('http', 'ws');
-    const wsUrl = `${protocol}//${window.location.host}/rtmp?url=${streamUrl}&key=${streamKey}&video=${settings.video}&audio=${settings.audio}`;
+    const wsUrl = new URL(`${protocol}//${window.location.host}/rtmp`);
+    wsUrl.searchParams.set('video', settings.video);
+    wsUrl.searchParams.set('audio', settings.audio);
+    if (streamUrl) {
+      wsUrl.searchParams.set('url', streamUrl);
+    }
+    if (streamKey) {
+      wsUrl.searchParams.set('key', streamKey);
+    }
     wsRef.current = new WebSocket(wsUrl);
 
     wsRef.current.addEventListener('open', function open() {
