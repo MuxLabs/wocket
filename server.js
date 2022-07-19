@@ -1,22 +1,32 @@
-const { createServer } = require('http');
+const http = require('http');
+const https = require('https');
 const { parse } = require('url');
 const next = require('next');
 const WebSocketServer = require('ws').Server;
 const child_process = require('child_process');
 const url = require('url');
+const fs = require('fs');
 
 const port = parseInt(process.env.PORT, 10) || 3000;
+const host = process.env.HOST || '0.0.0.0';
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
+const cert = process.env.CERT_FILE ? fs.readFileSync(process.env.CERT_FILE) : undefined;
+const key = process.env.KEY_FILE ? fs.readFileSync(process.env.KEY_FILE) : undefined;
+const transcode = process.env.SMART_TRANSCODE || true;
+const options = {
+  cert,
+  key
+};
 
 app.prepare().then(() => {
-  const server = createServer((req, res) => {
+  const server = (cert ? https : http).createServer(options,(req, res) => {
     const parsedUrl = parse(req.url, true);
     const { pathname, query } = parsedUrl;
 
     handle(req, res, parsedUrl);
-  }).listen(port, err => {
+  }).listen(port, host, err => {
     if (err) throw err;
     console.log(`> Ready on port ${port}`);
   });
@@ -31,18 +41,25 @@ app.prepare().then(() => {
 
     const queryString = url.parse(req.url).search;
     const params = new URLSearchParams(queryString);
+    const baseUrl = params.get('url') ?? 'rtmps://global-live.mux.com/app';
     const key = params.get('key');
+    const video = params.get('video');
+    const audio = params.get('audio');
 
-    const rtmpUrl = `rtmps://global-live.mux.com/app/${key}`;
+    const rtmpUrl = `${baseUrl}/${key}`;
 
-    const ffmpeg = child_process.spawn('ffmpeg', [
-      '-i','-',
-
+    const videoCodec = video === 'h264' && !transcode ? 
+      [ '-c:v', 'copy'] :
       // video codec config: low latency, adaptive bitrate
-      '-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'zerolatency',
+      ['-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'zerolatency', '-vf', 'scale=w=-2:0'];
 
+    const audioCodec = audio === 'aac' && !transcode ? 
+      [ '-c:a', 'copy'] :
       // audio codec config: sampling frequency (11025, 22050, 44100), bitrate 64 kbits
-      '-c:a', 'aac', '-ar', '44100', '-b:a', '64k',
+      ['-c:a', 'aac', '-ar', '44100', '-b:a', '64k'];
+
+      const ffmpeg = child_process.spawn('ffmpeg', [
+      '-i','-',
 
       //force to overwrite
       '-y',
@@ -51,6 +68,9 @@ app.prepare().then(() => {
       '-use_wallclock_as_timestamps', '1',
       '-async', '1',
 
+      ...videoCodec,
+
+      ...audioCodec,
       //'-filter_complex', 'aresample=44100', // resample audio to 44100Hz, needed if input is not 44100
       //'-strict', 'experimental',
       '-bufsize', '1000',
