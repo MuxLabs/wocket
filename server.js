@@ -108,7 +108,7 @@ app.prepare().then(() => {
     });
 
     ws.on('close', e => {
-      console.log('shit got closed, yo');
+      console.log('uh oh your socket closed');
       ffmpeg.kill('SIGINT');
     });
   });
